@@ -1,0 +1,29 @@
+default:
+  workspace: 00000000-0000-0000-0000-000000000000
+  library:   00000000-0000-0000-0000-000000000000
+
+rules:
+  - description: "Engineering space -> engineering library"
+    match:
+      space_key: ENG
+    target:
+      library: 00000000-0000-0000-0000-000000000001
+
+  - description: "Runbooks section -> operations library"
+    match:
+      ancestor_title: Runbooks
+    target:
+      library: 00000000-0000-0000-0000-000000000002
+
+  - description: "Cross-workspace example"
+    match:
+      space_key: PARTNER
+    target:
+      workspace: 00000000-0000-0000-0000-000000000099
+      library:   00000000-0000-0000-0000-000000000003
+
+policies:
+  page:
+    on_missing: delete
+  attachment:
+    on_missing: delete

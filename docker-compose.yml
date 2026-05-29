@@ -1,0 +1,29 @@
+# IronRAG ↔ Confluence connector — deployment compose.
+#
+#   cp .env.example .env.local             # CONFLUENCE_* + IRONRAG_* + ADMIN_BEARER_TOKEN
+#   cp routing.yaml.example routing.yaml   # map spaces/sections → (workspace, library)
+#   docker compose up -d
+#   docker compose logs -f
+#
+# `image:` pulls the release image published by CI on every GitHub release.
+# To run a locally built image instead, comment `image:` and uncomment `build: .`.
+services:
+  confluence-connector:
+    image: pipingspace/ironrag.confluence:latest
+    # build: .
+    container_name: ironrag-confluence-connector
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    volumes:
+      # Routing rules (read-only).
+      - ./routing.yaml:/app/routing.yaml:ro
+      # Persistent SQLite cursor so a restart ships only the diff.
+      - confluence-state:/var/lib/ironrag-connector
+    # Only needed for RUN_MODE=webhook/both (inbound /webhook/confluence).
+    # Bound to localhost; front it with a TLS reverse proxy for public intake.
+    ports:
+      - "127.0.0.1:8088:8088"
+
+volumes:
+  confluence-state:

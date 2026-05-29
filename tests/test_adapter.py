@@ -83,3 +83,64 @@ async def test_iter_items_and_fetch() -> None:
         assert dependent.ref.kind == KIND_ATTACHMENT
         assert dependent.ref.external_key == "confluence:attachment:77"
         assert dependent.mime_type == "application/pdf"
+
+
+class EmptyBodyConfluence(FakeConfluence):
+    """Page whose own body is empty but which hosts one attachment."""
+
+    def __init__(self, *, with_attachment: bool) -> None:
+        self._with_attachment = with_attachment
+
+    async def get_page(self, page_id: str) -> dict[str, Any]:
+        return {
+            "id": page_id,
+            "title": "Product",
+            "status": "current",
+            "space": {"key": "OPS", "name": "Operations"},
+            "version": {"when": "2026-05-22T00:00:00.000Z"},
+            "ancestors": [],
+            "body": {"export_view": {"value": ""}, "storage": {"value": ""}},
+            "_links": {"webui": "/display/OPS/Product"},
+        }
+
+    async def list_attachments(self, page_id: str) -> list[dict[str, Any]]:
+        if not self._with_attachment:
+            return []
+        return [
+            {
+                "id": "88",
+                "title": "spec.pdf",
+                "version": {"when": "2026-05-22T01:00:00.000Z"},
+                "_links": {"download": "/download/attachments/42/spec.pdf"},
+            }
+        ]
+
+
+@pytest.mark.asyncio
+async def test_empty_body_with_attachment_still_ingests() -> None:
+    fake = EmptyBodyConfluence(with_attachment=True)
+    with patch("confluence_connector.adapter.ConfluenceClient", return_value=fake):
+        adapter = ConfluenceAdapter(_settings())
+        ref = await _first(adapter.iter_items())
+        item = await adapter.fetch(ref)
+        assert item is not None, "empty body must not drop a page that has attachments"
+        body = item.payload.decode("utf-8")
+        assert "spec.pdf" in body, "synthesized index must link the attachment"
+        assert len(item.dependents) == 1
+        assert item.dependents[0].ref.external_key == "confluence:attachment:88"
+
+
+@pytest.mark.asyncio
+async def test_empty_body_without_attachment_returns_none() -> None:
+    fake = EmptyBodyConfluence(with_attachment=False)
+    with patch("confluence_connector.adapter.ConfluenceClient", return_value=fake):
+        adapter = ConfluenceAdapter(_settings())
+        ref = await _first(adapter.iter_items())
+        item = await adapter.fetch(ref)
+        assert item is None, "truly empty page with no attachments is skipped"
+
+
+async def _first(it: AsyncIterator[Any]) -> Any:
+    async for x in it:
+        return x
+    raise AssertionError("empty iter")

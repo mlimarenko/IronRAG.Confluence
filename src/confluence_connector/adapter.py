@@ -69,11 +69,6 @@ class ConfluenceAdapter(SourceAdapter):  # type: ignore[misc]
 
         title = page.get("title") if isinstance(page.get("title"), str) else None
         html = _extract_best_html(page)
-        if not html:
-            log.warning("confluence.fetch.empty_body", page_id=ref.item_id)
-            return None
-
-        wrapped_html = _wrap_html_document(title or f"Page {ref.item_id}", html)
         facts = self._routing_facts_for_page(page)
         page_ref = SourceItemRef(
             item_id=ref.item_id,
@@ -83,6 +78,26 @@ class ConfluenceAdapter(SourceAdapter):  # type: ignore[misc]
             routing_facts=facts,
             raw=page,
         )
+
+        # Build attachment dependents before deciding whether the page is
+        # ingestable. A page can carry no readable body of its own yet still
+        # host attachments (specs, PDFs, images) that are the real content —
+        # dropping the page on an empty body would silently lose every one of
+        # those attachment documents.
+        dependents = tuple(await self._build_attachment_dependents(page_ref, page))
+
+        if not html:
+            if not dependents:
+                log.warning("confluence.fetch.empty_body", page_id=ref.item_id)
+                return None
+            log.info(
+                "confluence.fetch.empty_body_with_attachments",
+                page_id=ref.item_id,
+                attachment_count=len(dependents),
+            )
+            html = _synthesize_attachment_index_html(dependents)
+
+        wrapped_html = _wrap_html_document(title or f"Page {ref.item_id}", html)
         item = SourceItem(
             ref=page_ref,
             payload=wrapped_html.encode("utf-8"),
@@ -90,7 +105,7 @@ class ConfluenceAdapter(SourceAdapter):  # type: ignore[misc]
             file_name=f"{_safe_filename(title or f'page-{ref.item_id}')}.html",
             title=title,
             document_hint=self._document_hint(page),
-            dependents=tuple(await self._build_attachment_dependents(page_ref, page)),
+            dependents=dependents,
         )
         return item
 
@@ -233,6 +248,22 @@ def _extract_best_html(page: dict[str, Any]) -> str | None:
         if isinstance(value, str) and value.strip():
             return value
     return None
+
+
+def _synthesize_attachment_index_html(dependents: tuple[SourceItem, ...]) -> str:
+    """Build a minimal body for a page that has no readable text of its own
+    but carries attachments. The body lists each attachment so the page
+    document is a useful index that links to its attachment documents,
+    instead of being dropped entirely."""
+    rows: list[str] = []
+    for dep in dependents:
+        label = dep.title or dep.file_name
+        href = dep.document_hint
+        if href:
+            rows.append(f'<li><a href="{_escape_html(href)}">{_escape_html(label)}</a></li>')
+        else:
+            rows.append(f"<li>{_escape_html(label)}</li>")
+    return "<ul>" + "".join(rows) + "</ul>"
 
 
 def _extract_change_token(item: dict[str, Any]) -> str | None:

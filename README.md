@@ -18,7 +18,10 @@ Confluence-specific behavior:
 - Flexible source selection via CQL + include/exclude space keys.
 - Routing facts that let you map different spaces/sections to different
   IronRAG workspaces/libraries.
-- Optional attachment sync as dependent items.
+- Optional attachment sync as dependent items. Page attachments and
+  inline images now ingest as attached context of their source page
+  rather than as peer documents — they are auto-linked to their page by
+  the SDK (`parent_external_key`), with no config change required.
 
 ## Quick start
 

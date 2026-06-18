@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uvicorn
 from ironrag_connector import Orchestrator, build_app
+from ironrag_connector.server import WebhookHandler
 
 from .adapter import ConfluenceAdapter
 from .config import ConfluenceSettings
@@ -9,10 +10,10 @@ from .webhook import make_confluence_handler
 
 
 def main() -> None:
-    settings = ConfluenceSettings()
+    settings = ConfluenceSettings()  # type: ignore[call-arg]
     adapter = ConfluenceAdapter(settings)
 
-    def make_handlers(orchestrator: Orchestrator) -> list[object]:
+    def make_handlers(orchestrator: Orchestrator) -> list[WebhookHandler]:
         return [make_confluence_handler(settings, adapter, orchestrator)]
 
     app = build_app(settings, adapter, webhook_factory=make_handlers)

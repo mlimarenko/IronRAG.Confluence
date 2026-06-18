@@ -8,7 +8,7 @@ from pydantic import Field
 ConfluenceAuthMode = Literal["auto", "anonymous", "basic", "bearer"]
 
 
-class ConfluenceSettings(BaseConnectorSettings):  # type: ignore[misc]
+class ConfluenceSettings(BaseConnectorSettings):
     confluence_base_url: str
     confluence_auth_mode: ConfluenceAuthMode = "auto"
     confluence_username: str | None = None

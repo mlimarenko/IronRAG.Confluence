@@ -25,7 +25,7 @@ log = get_logger(__name__)
 _FILENAME_SANITIZE_RE = re.compile(r"[^a-zA-Z0-9._-]+")
 
 
-class ConfluenceAdapter(SourceAdapter):  # type: ignore[misc]
+class ConfluenceAdapter(SourceAdapter):
     name = CONNECTOR_NAME
     kinds = KINDS
     primary_kinds = (KIND_PAGE,)

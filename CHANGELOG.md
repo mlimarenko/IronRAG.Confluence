@@ -1,5 +1,14 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.6 — 2026-06-18
+
+- Build against framework `v0.0.8`: full sweeps are now single-flight inside
+  the connector process, so manual, startup, and periodic triggers cannot run
+  overlapping mutation passes against the same cursor database. Concurrent
+  manual `/sync/run` requests return HTTP 409 while an existing sweep is active.
+- Inherits framework cancellation cleanup for manual sync requests that are
+  disconnected before the sweep finishes.
+
 ## 0.1.5 — 2026-06-18
 
 - Build against framework `v0.0.7`: large legacy cursor databases now cap

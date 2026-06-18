@@ -96,6 +96,10 @@ docker compose logs -f
 restart ships only the diff. Port 8088 is published on localhost only — put a
 TLS reverse proxy in front and use it only when running `RUN_MODE=webhook`/`both`.
 
+Long-running source items are bounded by `SYNC_ITEM_TIMEOUT_SECONDS`. IronRAG
+mutation admission and the post-sweep reaper list call can be bounded separately
+with `IRONRAG_MUTATION_TIMEOUT_SECONDS` and `REAPER_LIST_TIMEOUT_SECONDS`.
+
 ## Related
 
 - [IronRAG](https://github.com/mlimarenko/IronRAG) — the RAG backend these connectors feed.

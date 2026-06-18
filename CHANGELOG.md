@@ -1,5 +1,14 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.8 — 2026-06-18
+
+- Build against framework `v0.0.10`: IronRAG upload, replace, and delete
+  admission now fail fast with configurable mutation timeouts and are recorded
+  as deferred instead of holding a sweep indefinitely.
+- Inherits deferred cursor handling for primary and dependent items, plus a
+  bounded post-sweep reaper list call, so a slow backend can be retried by a
+  later sweep without advancing cursors for work that was not accepted.
+
 ## 0.1.7 — 2026-06-18
 
 - Build against framework `v0.0.9`: one source ref's fetch/push work,

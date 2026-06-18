@@ -1,5 +1,12 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.5 — 2026-06-18
+
+- Build against framework `v0.0.7`: large legacy cursor databases now cap
+  best-effort document-detail backfill before source enumeration, and the
+  same-route path backfills cursor ownership via the target library's
+  external-key lookup before trying slower document-detail calls.
+
 ## 0.1.4 — 2026-06-18
 
 - Build against framework `v0.0.6`: legacy cursor library backfill is now

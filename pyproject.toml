@@ -1,6 +1,6 @@
 [project]
 name = "ironrag-confluence-connector"
-version = "0.1.4"
+version = "0.1.5"
 description = "Confluence connector for IronRAG built on ironrag-connector."
 readme = "README.md"
 requires-python = ">=3.12"

@@ -1,5 +1,14 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.4 — 2026-06-18
+
+- Build against framework `v0.0.6`: legacy cursor library backfill is now
+  bounded and non-fatal, so a slow document-detail lookup no longer makes
+  manual `/sync/run` return 500 before Confluence enumeration starts.
+  Unresolved legacy cursor ownership still blocks possible duplicate uploads;
+  destructive cleanup for unknown historical libraries is deferred to a later
+  sweep.
+
 ## 0.1.3 — 2026-06-18
 
 - Build against framework `v0.0.5`: cursor rows now retain the target

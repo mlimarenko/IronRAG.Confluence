@@ -1,5 +1,14 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.9 — 2026-06-18
+
+- Build against framework `v0.0.11`: `routing.yaml` and per-kind policy
+  overrides are reloaded before each sweep and webhook-handled item, so routing
+  rule changes take effect without a connector restart.
+- Invalid or temporarily unreadable routing configuration keeps the last valid
+  routing state active, avoiding accidental document movement or deletion during
+  configuration edits.
+
 ## 0.1.8 — 2026-06-18
 
 - Build against framework `v0.0.10`: IronRAG upload, replace, and delete

@@ -1,5 +1,14 @@
 # Confluence ↔ IronRAG connector — Changelog
 
+## 0.1.7 — 2026-06-18
+
+- Build against framework `v0.0.9`: one source ref's fetch/push work,
+  including dependents, is bounded by `SYNC_ITEM_TIMEOUT_SECONDS`. A stuck item
+  is cancelled and counted as an item error so the sweep can continue to
+  `sync.done` instead of holding the single-flight sync lock indefinitely.
+- Inherits `sync.item.start` and `sync.item_timeout` logs for identifying the
+  source ref that is currently in flight or timed out.
+
 ## 0.1.6 — 2026-06-18
 
 - Build against framework `v0.0.8`: full sweeps are now single-flight inside
